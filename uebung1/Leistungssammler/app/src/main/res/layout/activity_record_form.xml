@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".persistence.RecordFormActivity"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="407dp"
+        android:layout_height="23dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/mod_num"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/modulnumberInput"
+        android:layout_width="406dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="textNoSuggestions"
+        android:maxLength="10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView1"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="399dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/mod_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/modulnumberInput" />
+
+    <AutoCompleteTextView
+        android:id="@+id/modulnameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        tools:ignore="SpeakableTextPresentCheck"
+        android:inputType="textNoSuggestions"
+        android:maxLength="50"
+        android:completionThreshold="2"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="401dp"
+        android:layout_height="26dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/semester"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/modulnameInput" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:id="@+id/ssCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sommersemester" />
+
+        <Spinner
+            android:id="@+id/year"
+            android:layout_width="123dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:minHeight="48dp"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="404dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/crP"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />
+
+    <EditText
+        android:id="@+id/crpInput"
+        android:layout_width="406dp"
+        android:layout_height="48dp"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/textView13"
+        android:layout_width="400dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/note"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/crpInput" />
+
+    <EditText
+        android:id="@+id/noteInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number"
+        android:minHeight="48dp"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <CheckBox
+        android:id="@+id/gewichtungCheck"
+        android:layout_width="399dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/weighting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/noteInput" />
+
+    <Button
+        android:id="@+id/saveBtn"
+        android:layout_width="396dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/save"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gewichtungCheck"
+        android:onClick="onSave"/>
+</LinearLayout>
