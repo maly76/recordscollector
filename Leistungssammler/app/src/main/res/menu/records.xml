@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<menu
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:context=".persistence.RecordsActivity">
+    <item
+        android:id="@+id/add_record_btn"
+        android:icon="@drawable/add_icon"
+        android:title="@string/add_record"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/stat_show_btn"
+        android:title="@string/statistic" />
+    <item
+        android:id="@+id/module_catalog_btn"
+        android:title="@string/module_catalog" />
+</menu>
