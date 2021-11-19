@@ -17,6 +17,11 @@
     <string name="delete">Löschen</string>
     <string name="selected">ausgewählt</string>
     <string name="changed_Flag">CHANGED</string>
+    <string name="search_module">Modul wählen</string>
+    <string name="refresh_modules">Moduldaten aktualisieren</string>
+    <string name="check_server_data">Prüfe Serverdaten</string>
+    <string name="loaded_new_data_success">Neue Daten erfolgreich geladen</string>
+    <string name="sure">Sind Sie sicher?</string>
     <string name="mod_num_not_empty">Modulenummer darf nicht leer sein!</string>
     <string name="crp_not_empty">Credit Points darf nicht leer sein!</string>
     <string name="crp_greater_15">Credit Points darf nicht größer als 15 sein!</string>

@@ -1,10 +1,13 @@
 package com.example.leistungssammler.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity
 class Record (_modulNum: String, _modulName: String, _year: Int,
-              _isSummerTerm: Boolean, _isHalfWeighted: Boolean, _crp: Int, _mark: Int
-             ): java.io.Serializable
-{
-    var id = -1;
+              _isSummerTerm: Boolean, _isHalfWeighted: Boolean, _crp: Int, _mark: Int) {
+    @PrimaryKey(autoGenerate = true)
+    var id: Int? = null
     var moduleNum: String = _modulNum
     var moduleName: String = _modulName
     var year = _year

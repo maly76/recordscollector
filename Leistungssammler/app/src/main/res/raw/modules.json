@@ -1,0 +1,72 @@
+[
+  {
+    "nr": "CS1019",
+    "name": "Compilerbau",
+    "crp": 6
+  },
+  {
+    "nr": "CS1022",
+    "name": "Betriebssysteme",
+    "crp": 6
+  },
+  {
+    "nr": "CS1013",
+    "name": "Objektorientierte Programmierung",
+    "crp": 6
+  },
+  {
+    "nr": "MN1007",
+    "name": "Diskrete Mathematik",
+    "crp": 6
+  },
+  {
+    "nr": "CS1014",
+    "name": "Grundlagen der Informatik",
+    "crp": 6
+  },
+  {
+    "nr": "MN1008",
+    "name": "Naturwissenschaftliche und technische Grundlagen",
+    "crp": 6
+  },
+  {
+    "nr": "CS1015",
+    "name": "Rechnernetze und ihre Anwendung",
+    "crp": 6
+  },
+  {
+    "nr": "CS1017",
+    "name": "Algorithmen und Datenstrukturen",
+    "crp": 6
+  },
+  {
+    "nr": "BA1004",
+    "name": "DV-orientierte Betriebswirtschaftslehre",
+    "crp": 3
+  },
+  {
+    "nr": "CS1024",
+    "name": "Internetbasierte Systeme",
+    "crp": 6
+  },
+  {
+    "nr": "MN1009",
+    "name": "Lineare Algebra",
+    "crp": 6
+  },
+  {
+    "nr": "CS2301",
+    "name": "Nebenläufige und verteilte Programme",
+    "crp": 6
+  },
+  {
+    "nr": "SM2505",
+    "name": "Audio-Podcasting",
+    "crp": 3
+  },
+  {
+    "nr": "SM2001",
+    "name": "Audiovisuelle Medien",
+    "crp": 6
+  }
+]

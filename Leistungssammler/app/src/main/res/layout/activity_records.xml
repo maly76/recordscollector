@@ -6,15 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".persistence.RecordsActivity">
 
-    <ListView
-        android:id="@+id/recordListView"
+    <ProgressBar
+        android:id="@+id/statsProgressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
 
     <TextView
         android:id="@+id/recordListEmptyView"
@@ -30,4 +30,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ListView
+        android:id="@+id/recordListView"
+        android:layout_width="match_parent"
+        android:layout_height="690dp"
+        android:layout_alignTop="@+id/recordListEmptyView"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 </RelativeLayout>

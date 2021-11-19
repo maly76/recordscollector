@@ -7,56 +7,148 @@ package com.example.leistungssammler.persistence
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.ActionMode
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.widget.*
+import androidx.activity.viewModels
+import androidx.constraintlayout.widget.Constraints
 import androidx.core.net.toUri
-import androidx.room.Room
+import androidx.lifecycle.lifecycleScope
+import androidx.work.*
 import com.example.leistungssammler.R
 import com.example.leistungssammler.databinding.ActivityRecordsBinding
 import com.example.leistungssammler.model.Record
-import com.example.leistungssammler.model.Stats
+import com.example.leistungssammler.viewmodels.RecordsViewModel
+import com.example.leistungssammler.viewmodels.Result
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.collections.ArrayList
+import androidx.work.Constraints.Builder
+import com.example.leistungssammler.model.Module
+import com.example.leistungssammler.worker.UpdateModulesWorker
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import java.util.concurrent.TimeUnit
 
 class RecordsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRecordsBinding
     private var selectedRecords = ArrayList<Record>()
     private lateinit var records: List<Record>
-    private lateinit var adapter: ArrayAdapter<Record>
-
+    private lateinit var recordDAO: RecordDAO
+    private val recordsViewModel: RecordsViewModel by viewModels()
+    private var pickerMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        var appStarted = false
         super.onCreate(savedInstanceState)
+
+        initWorkManager()
+
+        if (intent.action == Intent.ACTION_PICK) {
+            pickerMode = true
+        }
+
         binding = ActivityRecordsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        recordDAO = AppDatabase.getDb(this).recordDao()
+        records = emptyList()
+        var adapter = ArrayAdapter(this, android.R.layout.simple_list_item_activated_1, records)
 
-
-        records = RecordDAO.get(this).findAll()
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_activated_1, records)
-        binding.recordListView.adapter = adapter
+        recordsViewModel.records.observe(this){
+            records = it
+            if (!appStarted) {
+                adapter = ArrayAdapter(this, android.R.layout.simple_list_item_activated_1, records)
+                binding.recordListView.adapter = adapter
+                appStarted = true
+            } else {
+                if (!adapter.isEmpty) {
+                    adapter.clear()
+                }
+                adapter.addAll(it)
+            }
+        }
         binding.recordListView.emptyView = binding.recordListEmptyView
-    }
-
-    override fun onRestart() {
-        refreshRecords()
-        super.onRestart()
-    }
-
-    override fun onStart() {
-        super.onStart()
 
         binding.recordListView.onItemClickListener = AdapterView.OnItemClickListener { parent, _, position, _ ->
             val record = parent.getItemAtPosition(position) as Record
-            val intent = Intent(this, RecordFormActivity::class.java)
-            intent.putExtra("RECORD", record)
-            startActivity(intent)
+            if (pickerMode) {
+                Intent().let {
+                    it.data = "content://com.example.leistungssammler/records/${record.id}".toUri()
+                    setResult(RESULT_OK, it)
+                    finish()
+                }
+            } else {
+                val intent = Intent(this, RecordFormActivity::class.java)
+                intent.putExtra(RECORD_ID, record.id)
+                startActivity(intent)
+            }
         }
 
+        if (!pickerMode) {
+            enableMultiSelecting()
+        }
+    }
+
+    private fun initWorkManager() {
+        if(getFlag(FIRST_START, true) && !checkConnectivity()) {
+            val modules = getLocalModules()
+            val moduleDAO = AppDatabase.getDb(this).moduleDao()
+            lifecycleScope.launch(Dispatchers.IO){
+                moduleDAO.deleteAll()
+                moduleDAO.persistAll(modules)
+            }
+            setFlag(FIRST_START, false)
+        }
+
+        val constraints = Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val workRequest =
+        PeriodicWorkRequest.Builder(
+            UpdateModulesWorker::class.java,
+            30,
+            TimeUnit.DAYS
+        ).setConstraints(constraints).build()
+
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork("update modules", ExistingPeriodicWorkPolicy.KEEP, workRequest)
+    }
+
+    @ExperimentalSerializationApi
+    private fun getLocalModules(): List<Module> {
+        val file = applicationContext.resources.openRawResource(R.raw.modules)
+        val modules = Json.decodeFromStream<List<Module>>(file)
+        file.close()
+        return modules
+    }
+
+    private fun checkConnectivity(): Boolean {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCapabilities = cm.activeNetwork ?: return false
+        val activeNetwork = cm.getNetworkCapabilities(networkCapabilities) ?: return false
+        return when{
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)     -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else                                                               -> false
+        }
+    }
+
+    private fun setProgressBarVisible(visible: Boolean = true) {
+        binding.statsProgressBar.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+    }
+
+    private fun enableMultiSelecting() {
         binding.recordListView.choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL
         binding.recordListView.setMultiChoiceModeListener (object : AbsListView.MultiChoiceModeListener {
 
@@ -100,26 +192,19 @@ class RecordsActivity : AppCompatActivity() {
 
     private fun confirmDelete(mode: ActionMode): Boolean {
         AlertDialog.Builder(this)
-            .setTitle(R.string.statistic)
+            .setTitle(R.string.sure)
             .setMessage(R.string.delete_msg)
             .setNegativeButton(R.string.close, null)
             .setPositiveButton(R.string.delete) { _,_ ->
-                selectedRecords.forEach { RecordDAO.get(this).delete(it) }
-                setFlag(CHANGED_FLAG, true)
-                refreshRecords()
-                mode.finish()
+                lifecycleScope.launch(Dispatchers.IO){
+                    recordDAO.deleteAll(selectedRecords)
+                    withContext(Dispatchers.Main) {
+                        mode.finish()
+                    }
+                }
             }
             .show()
         return true
-    }
-
-    private fun refreshRecords() {
-        if (getFlag(CHANGED_FLAG)) {
-            adapter.clear()
-            records = RecordDAO.get(this).findAll()
-            adapter.addAll(records)
-            setFlag(CHANGED_FLAG, false)
-        }
     }
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -147,8 +232,10 @@ class RecordsActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.records, menu)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (!pickerMode) {
+            menuInflater.inflate(R.menu.records, menu)
+        }
         return true
     }
 
@@ -161,11 +248,7 @@ class RecordsActivity : AppCompatActivity() {
                 true
             }
             R.id.stat_show_btn -> {
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.statistic)
-                    .setMessage(Stats(records).toString())
-                    .setNeutralButton(R.string.close, null)
-                    .show()
+                showStatistic()
                 true
             }
             R.id.module_catalog_btn -> {
@@ -179,16 +262,34 @@ class RecordsActivity : AppCompatActivity() {
         }
     }
 
+    private fun showStatistic(){
+        recordsViewModel.statistic.observe(this) { result ->
+            when (result.status) {
+                Result.Status.IN_PROGRESS -> setProgressBarVisible()
+                Result.Status.SUCCESS -> {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.statistic)
+                        .setMessage(result.stats.toString())
+                        .setNeutralButton(R.string.close, null)
+                        .show()
+                    recordsViewModel.statistic.removeObservers(this)
+                    setProgressBarVisible(false)
+                }
+            }
+        }
+    }
+
     @SuppressLint("CommitPrefEdits")
     private fun setFlag(key: String, value: Boolean) {
         getSharedPreferences("prefs", MODE_PRIVATE).edit().putBoolean(key, value).apply()
     }
 
-    private fun getFlag(key: String): Boolean {
-        return getSharedPreferences("prefs", MODE_PRIVATE).getBoolean(key, false)
+    private fun getFlag(key: String, defVal: Boolean): Boolean {
+        return getSharedPreferences("prefs", MODE_PRIVATE).getBoolean(key, defVal)
     }
 
     companion object {
-        const val CHANGED_FLAG = "CHANGED"
+        const val RECORD_ID = "ID"
+        const val FIRST_START = "first_start"
     }
 }
